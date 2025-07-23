@@ -1,4 +1,6 @@
 import Image from "next/image";
+import PushNotificationManager from "./components/PushNotificationManager";
+import InstallPrompt from "./components/InstallPrompt";
 
 export default function Home() {
   return (
@@ -12,6 +14,18 @@ export default function Home() {
           height={38}
           priority
         />
+
+        <div className="w-full max-w-lg space-y-6">
+          <h1 className="text-2xl font-bold text-center">Expense Tracker</h1>
+          <p className="text-center text-gray-600">
+            A Progressive Web App for tracking your expenses and managing your
+            budget
+          </p>
+
+          <PushNotificationManager />
+          <InstallPrompt />
+        </div>
+
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
