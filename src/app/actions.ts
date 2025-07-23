@@ -2,6 +2,7 @@
 
 import webpush from "web-push";
 import { getServerSession } from "next-auth/next";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -24,7 +25,7 @@ interface SerializedSubscription {
 }
 
 export async function subscribeUser(subscriptionData: SerializedSubscription) {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as Session | null;
 
   if (!session?.user?.id) {
     throw new Error("User not authenticated");
@@ -60,7 +61,7 @@ export async function subscribeUser(subscriptionData: SerializedSubscription) {
 }
 
 export async function unsubscribeUser() {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as Session | null;
 
   if (!session?.user?.id) {
     throw new Error("User not authenticated");
@@ -81,7 +82,7 @@ export async function unsubscribeUser() {
 }
 
 export async function sendNotification(message: string) {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as Session | null;
 
   if (!session?.user?.id) {
     throw new Error("User not authenticated");
@@ -110,39 +111,46 @@ export async function sendUserNotification(
       return { success: true, message: "No subscriptions found" };
     }
 
-    const promises = subscriptions.map(async (sub) => {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dhKey,
-              auth: sub.authKey,
+    const promises = subscriptions.map(
+      async (sub: {
+        id: string;
+        endpoint: string;
+        p256dhKey: string;
+        authKey: string;
+      }) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: sub.p256dhKey,
+                auth: sub.authKey,
+              },
             },
-          },
-          JSON.stringify({
-            title,
-            body,
-            icon: "/icon-192x192.png",
-            badge: "/icon-192x192.png",
-            data,
-          })
-        );
-      } catch (error: unknown) {
-        console.error(
-          `Failed to send notification to subscription ${sub.id}:`,
-          error
-        );
-        // Remove invalid subscriptions
-        if (
-          error instanceof Error &&
-          "statusCode" in error &&
-          (error as any).statusCode === 410
-        ) {
-          await prisma.pushSubscription.delete({ where: { id: sub.id } });
+            JSON.stringify({
+              title,
+              body,
+              icon: "/icon-192x192.png",
+              badge: "/icon-192x192.png",
+              data,
+            })
+          );
+        } catch (error: unknown) {
+          console.error(
+            `Failed to send notification to subscription ${sub.id}:`,
+            error
+          );
+          // Remove invalid subscriptions
+          if (
+            error instanceof Error &&
+            "statusCode" in error &&
+            (error as Error & { statusCode: number }).statusCode === 410
+          ) {
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          }
         }
       }
-    });
+    );
 
     await Promise.all(promises);
     console.log("Notifications sent successfully");

@@ -3,12 +3,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatPersianDateTime, toPersianNumbers } from "@/lib/persian-date";
+import { formatPersianDateTime } from "@/lib/persian-date";
+
+interface TestResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  cronStatus?: {
+    isRunning: boolean;
+    nextRun: string;
+    type: string;
+    timezone: string;
+  };
+  timestamp?: string;
+  note?: string;
+}
 
 export default function ReminderDebugger() {
   const [isLoading, setIsLoading] = useState(false);
-  const [testResult, setTestResult] = useState<any>(null);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
 
   const handleTestReminders = async () => {
     setIsLoading(true);
@@ -90,64 +103,36 @@ export default function ReminderDebugger() {
 
             {testResult.success ? (
               <div className="space-y-3">
-                {/* Summary */}
+                {/* Success Message */}
                 <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {toPersianNumbers(testResult.summary?.totalDue || 0)}
-                      </div>
-                      <div className="text-xs text-green-700">سررسید شده</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {toPersianNumbers(testResult.summary?.processed || 0)}
-                      </div>
-                      <div className="text-xs text-blue-700">پردازش شده</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-red-600">
-                        {toPersianNumbers(testResult.summary?.errors || 0)}
-                      </div>
-                      <div className="text-xs text-red-700">خطا</div>
-                    </div>
+                  <div className="text-green-800 font-medium">
+                    ✅ تست موفقیت‌آمیز
                   </div>
+                  <div className="text-green-700 text-sm mt-1">
+                    {testResult.message}
+                  </div>
+                  {testResult.note && (
+                    <div className="text-green-600 text-xs mt-2">
+                      {testResult.note}
+                    </div>
+                  )}
                 </div>
 
-                {/* Details */}
-                {testResult.details && testResult.details.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium">جزئیات:</h4>
-                    {testResult.details.map((detail, index) => (
-                      <div
-                        key={index}
-                        className="p-2 border rounded-lg text-sm"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{detail.title}</span>
-                          <Badge
-                            variant={
-                              detail.status === "success"
-                                ? "default"
-                                : "destructive"
-                            }
-                          >
-                            {detail.status === "success" ? "موفق" : "خطا"}
-                          </Badge>
-                        </div>
-                        {detail.status === "success" && (
-                          <div className="text-xs text-gray-600 mt-1">
-                            بعدی:{" "}
-                            {formatPersianDateTime(new Date(detail.newDueDate))}
-                          </div>
-                        )}
-                        {detail.error && (
-                          <div className="text-xs text-red-600 mt-1">
-                            خطا: {detail.error}
-                          </div>
-                        )}
+                {/* Cron Status */}
+                {testResult.cronStatus && (
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-blue-800 font-medium mb-2">
+                      وضعیت Cron Job:
+                    </div>
+                    <div className="text-sm text-blue-700 space-y-1">
+                      <div>نوع: {testResult.cronStatus.type}</div>
+                      <div>
+                        وضعیت:{" "}
+                        {testResult.cronStatus.isRunning ? "فعال" : "غیرفعال"}
                       </div>
-                    ))}
+                      <div>زمان‌بندی: {testResult.cronStatus.nextRun}</div>
+                      <div>منطقه زمانی: {testResult.cronStatus.timezone}</div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -169,7 +154,7 @@ export default function ReminderDebugger() {
           </h3>
           <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
             <li>ابتدا یادآوری با تاریخ گذشته یا حال ایجاد کنید</li>
-            <li>روی دکمه "تست دستی" کلیک کنید</li>
+            <li>روی دکمه &quot;تست دستی&quot; کلیک کنید</li>
             <li>نتایج را در قسمت نتایج تست مشاهده کنید</li>
             <li>اگر push notification فعال باشد، اعلان دریافت خواهید کرد</li>
           </ul>
