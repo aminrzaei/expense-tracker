@@ -1,9 +1,8 @@
-import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -12,6 +11,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // @ts-expect-error NextAuth v4 callback types
     session: ({ session, user }) => ({
       ...session,
       user: {

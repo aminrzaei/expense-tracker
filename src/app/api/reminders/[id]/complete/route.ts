@@ -35,7 +35,7 @@ function calculateNextDueDate(current: Date, frequency: string): Date {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session: Session | null = await getServerSession(authOptions);
@@ -44,7 +44,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const reminderId = params.id;
+    const { id: reminderId } = await params;
 
     // Get the reminder to check ownership and get current details
     const reminder = await prisma.reminder.findFirst({
