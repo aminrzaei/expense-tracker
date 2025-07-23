@@ -122,12 +122,16 @@ export default function PushNotificationManager() {
   };
 
   if (!isSupported) {
-    return <p>Push notifications are not supported in this browser.</p>;
+    return (
+      <p className="text-gray-500">
+        این مرورگر از اعلان‌های فوری پشتیبانی نمی‌کند.
+      </p>
+    );
   }
 
   return (
-    <div className="space-y-4 p-4 border border-gray-200 rounded-lg">
-      <h3 className="text-lg font-semibold">Push Notifications</h3>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">🔔 اعلان‌های فوری</h3>
 
       {/* In-app notifications display */}
       {notifications.length > 0 && (
@@ -161,42 +165,38 @@ export default function PushNotificationManager() {
 
       {subscription ? (
         <>
-          <p className="text-green-600">
-            ✅ You are subscribed to push notifications.
-          </p>
+          <p className="text-green-600">✅ شما عضو اعلان‌های فوری شده‌اید.</p>
           <button
             onClick={unsubscribeFromPush}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded btn-rtl"
           >
-            Unsubscribe
+            🚫 لغو عضویت
           </button>
 
           <div className="space-y-2">
             <input
               type="text"
-              placeholder="Enter notification message"
+              placeholder="پیام آزمایشی بنویسید"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <button
               onClick={sendTestNotification}
-              className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded btn-rtl"
             >
-              Send Test Notification
+              📤 ارسال اعلان آزمایشی
             </button>
           </div>
         </>
       ) : (
         <>
-          <p className="text-gray-600">
-            You are not subscribed to push notifications.
-          </p>
+          <p className="text-gray-600">شما عضو اعلان‌های فوری نیستید.</p>
           <button
             onClick={subscribeToPush}
-            className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded btn-rtl"
           >
-            Subscribe
+            🔔 عضویت در اعلان‌ها
           </button>
         </>
       )}

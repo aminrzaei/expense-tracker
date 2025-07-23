@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/lib/providers";
+import { initializeApp } from "@/lib/startup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,13 +61,16 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+// Initialize app services
+initializeApp();
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fa" dir="rtl">
       <head>
         <meta name="application-name" content="Expense Tracker" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -95,7 +100,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
